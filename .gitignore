@@ -1,0 +1,18 @@
+# Виртуальное окружение
+.venv/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+
+# Кэш ruff
+.ruff_cache/
+
+# Сборочные артефакты
+dist/
+build/
+*.egg-info/
+
+# Настройки редакторов
+.vscode/
+.idea/
