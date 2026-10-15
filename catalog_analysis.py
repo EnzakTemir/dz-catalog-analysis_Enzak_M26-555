@@ -60,7 +60,7 @@ def decade_label(year):
             return "старые"
 
 
-def print_non_comedy(movies):
+def no_comedy(movies):
     for movie in movies:
         if "comedy" in movie["genres"]:
             continue
@@ -106,10 +106,23 @@ def format_report_line(movie):
     )
 
 
+def titles_sorted_by_rating(movies):
+    ordered = sorted(movies, key=lambda m: m["rating"], reverse=True)
+    return [movie["title"] for movie in ordered]
+
+
+def top_n_by_rating(movies, n=3):
+    ordered = sorted(movies, key=lambda m: m["rating"], reverse=True)
+    return [(movie["title"], movie["rating"]) for movie in ordered[:n]]
+
+
 if __name__ == "__main__":
     print("Средняя оценка:", average_rating(movies))
     print("Статистика по возрасту:", catalog_age_stats(movies))
     print("Длительность первого фильма:", duration_in_hours(movies[0]["duration_min"]))
+    
+    
+    print("_______________________")
     for movie in movies:
         print(
             movie["title"],
@@ -123,18 +136,32 @@ if __name__ == "__main__":
             decade_label(movie["year"]),
         )
 
-    print()
-    print("Не комедии:")
-    print_non_comedy(movies)
 
-    print()
+    print("_______________________")
+    print("Не комедии:")
+    no_comedy(movies)
+    
+
+    print("_______________________")
     print("Первый шедевр:")
     find_first_masterpiece(movies)
 
-    print()
+
+    print("_______________________")
     print("Фильмов длиннее 120 минут:", count_long_movies(movies))
 
-    print()
+
+    print("_______________________")
     print("normalize_title:", normalize_title("silent hours"))
     print("make_slug:", make_slug("Silent Hours"))
     print("format_report_line:", format_report_line(movies[7]))
+
+
+    print("_______________________")
+    print("titles_sorted_by_rating:")
+    for title in titles_sorted_by_rating(movies):
+        print(" ", title)
+
+
+    print("_______________________")
+    print("top_n_by_rating:", top_n_by_rating(movies, 3))
