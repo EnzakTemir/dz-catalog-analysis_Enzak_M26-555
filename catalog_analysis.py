@@ -86,6 +86,26 @@ def count_long_movies(movies, threshold=120):
     return count
 
 
+def normalize_title(title):
+    words = title.split()
+    normalized = [word[0].upper() + word[1:] for word in words]
+    return " ".join(normalized)
+
+
+def make_slug(title):
+    return title.lower().replace(" ", "-")
+
+
+def format_report_line(movie):
+    title = normalize_title(movie["title"])
+    genres = ", ".join(sorted(movie["genres"]))
+    duration = duration_in_hours(movie["duration_min"])
+    return (
+        f'"{title}" ({movie["year"]}) — {movie["rating"]}/10, '
+        f"{duration}, жанры: {genres}"
+    )
+
+
 if __name__ == "__main__":
     print("Средняя оценка:", average_rating(movies))
     print("Статистика по возрасту:", catalog_age_stats(movies))
@@ -113,3 +133,8 @@ if __name__ == "__main__":
 
     print()
     print("Фильмов длиннее 120 минут:", count_long_movies(movies))
+
+    print()
+    print("normalize_title:", normalize_title("silent hours"))
+    print("make_slug:", make_slug("Silent Hours"))
+    print("format_report_line:", format_report_line(movies[7]))
