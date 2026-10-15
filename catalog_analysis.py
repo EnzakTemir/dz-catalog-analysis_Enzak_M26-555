@@ -164,87 +164,112 @@ def iter_high_rated(movies, min_rating=8.0):
             yield movie
 
 
-if __name__ == "__main__":
-    print("Средняя оценка:", average_rating(movies))
-    print("Статистика по возрасту:", catalog_age_stats(movies))
-    print("Длительность первого фильма:", duration_in_hours(movies[0]["duration_min"]))
-    
-    
-    print("_______________________")
+def build_report(movies):
+    print("ОТЧЕТ АНАЛИТИКИ ПО КАТАЛОГУ ФИЛЬМОВ")
+    print(f"Средний рейтинг: {average_rating(movies)}")
+
+    _, _, avg_age = catalog_age_stats(movies)
+    print(f"Средний возраст фильмов: {avg_age} лет")
+
+    print("\nТоп-3 фильма:")
+    for title, rating in top_n_by_rating(movies, 3):
+        movie = next(m for m in movies if m["title"] == title)
+        print("  " + format_report_line(movie))
+
+    print("\nФильмов по жанрам:")
+    genre_counts = count_by_genre(movies)
+    for genre, count in sorted(
+        genre_counts.items(), key=lambda item: (-item[1], item[0])
+    ):
+        print(f"  {genre} — {count}")
+
+    print("\nВсе жанры каталога:", ", ".join(sorted(all_genres(movies))))
+
+    print(f"\nФильмов длиннее 120 минут: {count_long_movies(movies)}")
     for movie in movies:
+        if movie["duration_min"] > 120:
+            print(
+                f'  "{normalize_title(movie["title"])}" — '
+                f'{movie["duration_min"]} мин'
+            )
+
+    print("\nВсе фильмы по убыванию рейтинга:")
+    ordered = sorted(movies, key=lambda m: m["rating"], reverse=True)
+    for movie in ordered:
+        print("   ", format_report_line(movie))
+
+    print("\nТоп по каждому жанру:")
+    for genre in sorted(all_genres(movies)):
+        genre_movies = [m for m in movies if genre in m["genres"]]
+        best = sorted(genre_movies, key=lambda m: m["rating"], reverse=True)[:3]
+        print(f"  {genre}:")
+        for movie in best:
+            print(f"    {format_report_line(movie)}")
+
+    print("\nСредний рейтинг и средняя длительность по жанрам:")
+    for genre in sorted(all_genres(movies)):
+        genre_movies = [m for m in movies if genre in m["genres"]]
+        avg_r = average_rating(genre_movies)
+        avg_d = round(
+            sum(m["duration_min"] for m in genre_movies) / len(genre_movies)
+        )
         print(
-            movie["title"],
-            " ",
-            movie["rating"],
-            "=",
-            rating_tier(movie["rating"]),
-            "and",
-            movie["year"],
-            "=",
-            decade_label(movie["year"]),
+            f"  {genre}: рейтинг {avg_r}, "
+            f"длительность {duration_in_hours(avg_d)}"
         )
 
+    print("\nТоп-актёры по числу фильмов:")
+    filmography = actor_filmography(movies)
+    by_count = sorted(
+        filmography.items(), key=lambda kv: len(kv[1]), reverse=True
+    )
+    for actor, titles in by_count:
+        print(f"  {actor} — {len(titles)} фильмов")
 
-    print("_______________________")
-    print("Не комедии:")
-    no_comedy(movies)
-    
+    print("\nТоп-актёры по среднему рейтингу фильмов:")
+    actors_avg = []
+    for actor, titles in filmography.items():
+        actor_movies = [m for m in movies if m["title"] in titles]
+        actors_avg.append((actor, average_rating(actor_movies)))
+    actors_avg.sort(key=lambda item: item[1], reverse=True)
+    for actor, avg in actors_avg:
+        print(f"  {actor} — средний рейтинг {avg}")
 
-    print("_______________________")
-    print("Первый шедевр:")
-    find_first_masterpiece(movies)
+    print("\nРаспределение по категориям рейтинга:")
+    tiers = {}
+    for movie in movies:
+        tier = rating_tier(movie["rating"])
+        tiers[tier] = tiers.get(tier, 0) + 1
+    for tier, count in sorted(
+        tiers.items(), key=lambda kv: kv[1], reverse=True
+    ):
+        print(f"  {tier} — {count}")
 
+    print("\nРаспределение по десятилетним меткам:")
+    labels = {}
+    for movie in movies:
+        label = decade_label(movie["year"])
+        labels[label] = labels.get(label, 0) + 1
+    for label, count in sorted(
+        labels.items(), key=lambda kv: kv[1], reverse=True
+    ):
+        print(f"  {label} — {count}")
 
-    print("_______________________")
-    print("Фильмов длиннее 120 минут:", count_long_movies(movies))
+    print("\nРедкие жанры (встречаются 1 раз):")
+    rare = {g: c for g, c in genre_counts.items() if c == 1}
+    if rare:
+        for genre, count in rare.items():
+            print(f"  {genre} — {count}")
+    else:
+        print("  Нет редких жанров")
 
-
-    print("_______________________")
-    print("normalize_title:", normalize_title("silent hours"))
-    print("make_slug:", make_slug("Silent Hours"))
-    print("format_report_line:", format_report_line(movies[7]))
-
-
-    print("_______________________")
-    print("titles_sorted_by_rating:")
-    for title in titles_sorted_by_rating(movies):
-        print(" ", title)
-
-
-    print("_______________________")
-    print("top_n_by_rating:", top_n_by_rating(movies, 3))
-
-
-    print("_______________________")
-    print("count_by_genre:", count_by_genre(movies))
-
-
-    print("_______________________")
-    print("actor_filmography:", actor_filmography(movies))
-
-
-    print("_______________________")
-    print("dict_compr:", dict_compr(movies))
-
-
-    print("_______________________")
-    print("all_genres:", all_genres(movies))
-
-
-    print("_______________________")
-    print("common_actors:", common_actors(movies[0], movies[3]))
-
-
-    print("_______________________")
-    print("genres_only_in_one:", genres_only_in_one(movies[5:6], movies[:5]))
+    print("\nФильмы с рейтингом выше среднего:")
+    above = dict_compr(movies)
+    for title, rating in sorted(
+        above.items(), key=lambda kv: kv[1], reverse=True
+    ):
+        print(f"  {normalize_title(title)} — {rating}")
 
 
-    print("_______________________")
-    print("iter_high_rated:")
-    for movie in iter_high_rated(movies):
-        print(format_report_line(movie))
-
-
-    print("_______________________")
-    print("Суммарная длительность фильмов с рейтингом выше 7:",
-          sum(m["duration_min"] for m in movies if m["rating"] > 7))
+if __name__ == "__main__":
+    build_report(movies)
