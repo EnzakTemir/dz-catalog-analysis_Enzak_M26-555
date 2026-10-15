@@ -137,6 +137,27 @@ def dict_compr(movies):
     return {movie["title"]: movie["rating"] for movie in movies if movie["rating"] > avg}  # noqa: E501
 
 
+def all_genres(movies):
+    result = set()
+    for movie in movies:
+        result.update(movie["genres"])
+    return result
+
+
+def common_actors(movie1, movie2):
+    return set(movie1["actors"]) & set(movie2["actors"])
+
+
+def genres_only_in_one(movies_a, movies_b):
+    genres_a = set()
+    for movie in movies_a:
+        genres_a.update(movie["genres"])
+    genres_b = set()
+    for movie in movies_b:
+        genres_b.update(movie["genres"])
+    return genres_a - genres_b
+
+
 if __name__ == "__main__":
     print("Средняя оценка:", average_rating(movies))
     print("Статистика по возрасту:", catalog_age_stats(movies))
@@ -198,3 +219,15 @@ if __name__ == "__main__":
 
     print("_______________________")
     print("dict_compr:", dict_compr(movies))
+
+
+    print("_______________________")
+    print("all_genres:", all_genres(movies))
+
+
+    print("_______________________")
+    print("common_actors:", common_actors(movies[0], movies[3]))
+
+
+    print("_______________________")
+    print("genres_only_in_one:", genres_only_in_one(movies[5:6], movies[:5]))
