@@ -116,6 +116,27 @@ def top_n_by_rating(movies, n=3):
     return [(movie["title"], movie["rating"]) for movie in ordered[:n]]
 
 
+def count_by_genre(movies):
+    result = {}
+    for movie in movies:
+        for genre in movie["genres"]:
+            result[genre] = result.get(genre, 0) + 1
+    return result
+
+
+def actor_filmography(movies):
+    result = {}
+    for movie in movies:
+        for actor in movie["actors"]:
+            result.setdefault(actor, []).append(movie["title"])
+    return result
+
+
+def dict_compr(movies):
+    avg = average_rating(movies)
+    return {movie["title"]: movie["rating"] for movie in movies if movie["rating"] > avg}  # noqa: E501
+
+
 if __name__ == "__main__":
     print("Средняя оценка:", average_rating(movies))
     print("Статистика по возрасту:", catalog_age_stats(movies))
@@ -165,3 +186,15 @@ if __name__ == "__main__":
 
     print("_______________________")
     print("top_n_by_rating:", top_n_by_rating(movies, 3))
+
+
+    print("_______________________")
+    print("count_by_genre:", count_by_genre(movies))
+
+
+    print("_______________________")
+    print("actor_filmography:", actor_filmography(movies))
+
+
+    print("_______________________")
+    print("dict_compr:", dict_compr(movies))
