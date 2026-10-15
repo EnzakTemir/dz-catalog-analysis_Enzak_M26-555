@@ -60,6 +60,32 @@ def decade_label(year):
             return "старые"
 
 
+def print_non_comedy(movies):
+    for movie in movies:
+        if "comedy" in movie["genres"]:
+            continue
+        print(movie["title"])
+
+
+def find_first_masterpiece(movies):
+    i = 0
+    while i < len(movies):
+        if movies[i]["rating"] > 9.0:
+            print(movies[i]["title"])
+            break
+        i += 1
+    else:
+        print("Шедевров не найдено")
+
+
+def count_long_movies(movies, threshold=120):
+    count = 0
+    for movie in movies:
+        if movie["duration_min"] > threshold:
+            count += 1
+    return count
+
+
 if __name__ == "__main__":
     print("Средняя оценка:", average_rating(movies))
     print("Статистика по возрасту:", catalog_age_stats(movies))
@@ -76,3 +102,14 @@ if __name__ == "__main__":
             "=",
             decade_label(movie["year"]),
         )
+
+    print()
+    print("Не комедии:")
+    print_non_comedy(movies)
+
+    print()
+    print("Первый шедевр:")
+    find_first_masterpiece(movies)
+
+    print()
+    print("Фильмов длиннее 120 минут:", count_long_movies(movies))
